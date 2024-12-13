@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic File Uploader</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>Dynamic Submission Form</h1>
+    <form id="dynamic-upload-form">
+      <div class="mb-3">
+        <label for="submission" class="form-label">Submission Type</label>
+        <select class="form-select" id="submission" name="submission" onchange="updateFormFields()" required>
+          <option value="Emails">Emails</option>
+          <option value="Resume">Resume</option>
+          <!-- Add other submission types as needed -->
+        </select>
+      </div>
+      <div id="form-fields">
+        <!-- Dynamic form fields will be injected here -->
+      </div>
+      <button type="button" class="btn btn-primary" onclick="uploadFile()">Submit</button>
+    </form>
+
+    <!-- Modal for Success -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="successModalLabel">Submission Successful</h5>
+          </div>
+          <div class="modal-body">
+            Your form has been submitted successfully!
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const APILINK = "https://script.google.com/macros/s/AKfycbyC9a51NH-U8MMsMjn4EY1af7blB9ik-HQjUa3cVFlFuTRdybhk4YwlN9j-lhab5a8cGQ/exec"; // Replace with the Apps Script web app URL
+
+    // Define fields for each submission type
+    const formConfigurations = {
+      Emails: [
+        { label: "Email", name: "Email", type: "email", required: true },
+      ],
+      Resume: [
+        { label: "Job Title", name: "JobTitle", type: "text", required: true },
+        { label: "Name", name: "Name", type: "text", required: true },
+        { label: "Email", name: "Email", type: "email", required: true },
+        { label: "Message", name: "Message", type: "textarea", required: false },
+        { label: "Upload Resume", name: "File", type: "file", required: true, hiddenInputs: ["fileContent", "filename"] },
+      ],
+    };
+
+    // Function to update form fields based on submission type
+    function updateFormFields() {
+      const submissionType = document.getElementById('submission').value;
+      const formFieldsContainer = document.getElementById('form-fields');
+
+      // Clear existing fields
+      formFieldsContainer.innerHTML = '';
+
+      // Generate new fields
+      formConfigurations[submissionType].forEach((field) => {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.classList.add('mb-3');
+
+        const label = document.createElement('label');
+        label.classList.add('form-label');
+        label.setAttribute('for', field.name);
+        label.textContent = field.label;
+        fieldDiv.appendChild(label);
+
+        let input;
+        if (field.type === 'textarea') {
+          input = document.createElement('textarea');
+          input.classList.add('form-control');
+        } else {
+          input = document.createElement('input');
+          input.classList.add('form-control');
+          input.type = field.type;
+        }
+
+        input.id = field.name;
+        input.name = field.name;
+        if (field.required) input.required = true;
+        fieldDiv.appendChild(input);
+
+        formFieldsContainer.appendChild(fieldDiv);
+
+        // Handle hidden inputs for file uploads
+        if (field.type === 'file' && field.hiddenInputs) {
+          field.hiddenInputs.forEach((hiddenInputName) => {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = hiddenInputName;
+            hiddenInput.name = hiddenInputName;
+            formFieldsContainer.appendChild(hiddenInput);
+          });
+        }
+      });
+    }
+
+    // Initial form setup
+    updateFormFields();
+
+    async function uploadFile() {
+  const fileInput = document.getElementById('File').files[0];
+  
+  if (fileInput) {
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      document.getElementById('fileContent').value = reader.result;
+      document.getElementById('filename').value = fileInput.name;
+
+      // For now, just log the results or perform any other action you want.
+      submitForm();
+    };
+
+    reader.readAsDataURL(fileInput);
+  } else {
+    alert('No file selected. Please choose a file to upload.');
+  }
+}
+
+
+    async function submitForm() {
+      const formData = new FormData(document.getElementById('dynamic-upload-form'));
+
+      try {
+        const response = await fetch(APILINK, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+            document.getElementById('dynamic-upload-form').reset();
+            updateFormFields(); // Reset fields dynamically
+          } else if (result.error) {
+            alert(`Error: ${result.error}`);
+          }
+        } else {
+          alert("Failed to submit the form. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred during submission.");
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
