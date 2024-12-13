@@ -82,13 +82,9 @@ This project provides a flexible, dynamic web form for file uploads and submissi
    - Try "Emails" and "Resume" submission types
    - Upload files, fill out forms
    
-   ![Form Submission](/screenshots/form-submission.png)
-
 3. **Verify Google Sheet**
    - Check your Google Sheet to confirm data is being recorded
    
-   ![Sheet Data](/screenshots/sheet-data.png)
-
 ## Troubleshooting
 
 ### Common Issues
