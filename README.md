@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://qualitytraining.be/content/uploads/2022/07/formation-google-sheet-belgique.png" align="center" width="20%">
+    <img src="/images/SheetStorage.png" align="center" width="20%">
 </p>
 # SheetStorage ( Dynamic File Upload and Submission System)
 This project provides a flexible, dynamic web form for file uploads and submissions, leveraging Google Sheets as a backend storage solution using Google Apps Script.
